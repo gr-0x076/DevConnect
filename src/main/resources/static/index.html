@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#f5f7fb">
+	<title>DevConnect | Backend status & Developers</title>
+	<style>
+		:root {
+			color-scheme: light;
+			font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+			color: #172033;
+			background: #f5f7fb;
+			font-synthesis: none;
+			text-rendering: optimizeLegibility;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			min-width: 320px;
+			min-height: 100vh;
+			margin: 0;
+			background:
+				radial-gradient(ellipse at 12% 0%, #e0eaff 0, transparent 34rem),
+				#f5f7fb;
+		}
+
+		.topbar {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			max-width: 1120px;
+			margin: 0 auto;
+			padding: 26px 28px;
+		}
+
+		.brand {
+			display: flex;
+			align-items: center;
+			gap: 11px;
+			font-weight: 750;
+			letter-spacing: -0.03em;
+		}
+
+		.brand-mark {
+			display: grid;
+			width: 34px;
+			height: 34px;
+			place-items: center;
+			border-radius: 11px;
+			background: #3158d5;
+			color: white;
+			font-size: 15px;
+		}
+
+		.local-label {
+			color: #667085;
+			font-size: 13px;
+		}
+
+		main {
+			width: min(100% - 32px, 760px);
+			margin: 48px auto 80px;
+		}
+
+		.intro {
+			margin-bottom: 30px;
+		}
+
+		.eyebrow {
+			margin: 0 0 12px;
+			color: #3158d5;
+			font-size: 12px;
+			font-weight: 750;
+			letter-spacing: 0.12em;
+			text-transform: uppercase;
+		}
+
+		h1 {
+			margin: 0;
+			font-size: clamp(32px, 6vw, 46px);
+			letter-spacing: -0.055em;
+			line-height: 1.08;
+		}
+
+		.intro-copy {
+			max-width: 570px;
+			margin: 15px 0 0;
+			color: #667085;
+			font-size: 16px;
+			line-height: 1.65;
+		}
+
+		.panel {
+			padding: 28px;
+			border: 1px solid #e5e9f2;
+			border-radius: 18px;
+			background: rgba(255, 255, 255, 0.92);
+			box-shadow: 0 20px 55px rgba(32, 49, 91, 0.08);
+		}
+
+		.panel + .panel {
+			margin-top: 24px;
+		}
+
+		.panel-heading {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			gap: 20px;
+		}
+
+		.panel h2 {
+			margin: 0;
+			font-size: 18px;
+			letter-spacing: -0.025em;
+		}
+
+		.panel-description {
+			margin: 7px 0 0;
+			color: #667085;
+			font-size: 14px;
+			line-height: 1.5;
+		}
+
+		.status {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			flex: 0 0 auto;
+			padding: 8px 11px;
+			border-radius: 999px;
+			background: #f0f2f6;
+			color: #596273;
+			font-size: 12px;
+			font-weight: 700;
+		}
+
+		.status::before {
+			width: 7px;
+			height: 7px;
+			border-radius: 50%;
+			background: currentColor;
+			content: "";
+		}
+
+		.status[data-state="healthy"] {
+			background: #e8f7ef;
+			color: #18834b;
+		}
+
+		.status[data-state="error"] {
+			background: #fff0ef;
+			color: #b9382e;
+		}
+
+		.status[data-state="checking"] {
+			background: #edf2ff;
+			color: #3158d5;
+		}
+
+		.status[data-state="checking"]::before {
+			animation: pulse 0.9s ease-in-out infinite alternate;
+		}
+
+		@keyframes pulse {
+			to { opacity: 0.25; }
+		}
+
+		.endpoint {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 16px;
+			margin-top: 25px;
+			padding: 16px;
+			border: 1px solid #edf0f5;
+			border-radius: 12px;
+			background: #fafbfe;
+		}
+
+		.endpoint-label {
+			color: #667085;
+			font-size: 12px;
+		}
+
+		code {
+			display: block;
+			margin-top: 5px;
+			color: #263656;
+			font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+			font-size: 13px;
+		}
+
+		button {
+			min-height: 42px;
+			padding: 0 16px;
+			border: 0;
+			border-radius: 10px;
+			background: #3158d5;
+			color: white;
+			font: inherit;
+			font-size: 13px;
+			font-weight: 700;
+			cursor: pointer;
+			transition: background 150ms ease, transform 150ms ease;
+		}
+
+		button:hover:not(:disabled) {
+			transform: translateY(-1px);
+			background: #2448bd;
+		}
+
+		button:focus-visible {
+			outline: 3px solid #aebeff;
+			outline-offset: 3px;
+		}
+
+		button:disabled {
+			cursor: wait;
+			opacity: 0.7;
+		}
+
+		.result {
+			min-height: 22px;
+			margin: 14px 0 0;
+			color: #667085;
+			font-size: 13px;
+		}
+
+		.dev-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+			gap: 16px;
+			margin-top: 20px;
+		}
+
+		.dev-card {
+			padding: 18px;
+			border: 1px solid #edf0f5;
+			border-radius: 12px;
+			background: #fafbfe;
+			transition: transform 150ms ease, box-shadow 150ms ease;
+		}
+
+		.dev-card:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 24px rgba(32, 49, 91, 0.06);
+		}
+
+		.dev-header {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+
+		.dev-avatar {
+			width: 38px;
+			height: 38px;
+			border-radius: 50%;
+			background: linear-gradient(135deg, #3158d5, #6366f1);
+			color: white;
+			font-weight: 700;
+			font-size: 14px;
+			display: grid;
+			place-items: center;
+			flex-shrink: 0;
+		}
+
+		.dev-name {
+			margin: 0;
+			font-size: 15px;
+			font-weight: 700;
+			color: #172033;
+		}
+
+		.dev-role {
+			margin: 2px 0 0;
+			font-size: 12px;
+			color: #3158d5;
+			font-weight: 600;
+		}
+
+		.dev-bio {
+			margin: 10px 0 0;
+			font-size: 13px;
+			color: #596273;
+			line-height: 1.5;
+		}
+
+		.dev-skills {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 6px;
+			margin-top: 12px;
+		}
+
+		.skill-badge {
+			display: inline-block;
+			padding: 3px 8px;
+			border-radius: 6px;
+			background: #edf2ff;
+			color: #2448bd;
+			font-size: 11px;
+			font-weight: 600;
+		}
+
+		.dev-email {
+			display: inline-block;
+			margin-top: 12px;
+			font-size: 12px;
+			color: #667085;
+			text-decoration: none;
+		}
+
+		.dev-email:hover {
+			color: #3158d5;
+			text-decoration: underline;
+		}
+
+		.learning {
+			margin-top: 24px;
+			padding: 20px 22px;
+			border: 1px solid #e5e9f2;
+			border-radius: 14px;
+			background: rgba(255, 255, 255, 0.68);
+		}
+
+		.learning h2 {
+			margin: 0 0 12px;
+			font-size: 14px;
+		}
+
+		.flow {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 8px;
+			color: #596273;
+			font-size: 12px;
+			line-height: 1.5;
+		}
+
+		.flow span {
+			padding: 6px 9px;
+			border: 1px solid #e7eaf1;
+			border-radius: 7px;
+			background: white;
+		}
+
+		.flow code {
+			display: inline;
+			margin: 0;
+		}
+
+		.flow b {
+			color: #8490a4;
+			font-weight: 500;
+		}
+
+		@media (max-width: 540px) {
+			.topbar {
+				padding: 20px 20px;
+			}
+
+			main {
+				margin-top: 34px;
+			}
+
+			.panel {
+				padding: 21px;
+			}
+
+			.panel-heading {
+				flex-direction: column-reverse;
+				gap: 14px;
+			}
+
+			.endpoint {
+				align-items: stretch;
+				flex-direction: column;
+			}
+		}
+	</style>
+</head>
+<body>
+	<header class="topbar">
+		<div class="brand"><span class="brand-mark" aria-hidden="true">D</span>DevConnect</div>
+		<span class="local-label">Local development</span>
+	</header>
+
+	<main>
+		<section class="intro" aria-labelledby="page-title">
+			<p class="eyebrow">Your first full-stack connection</p>
+			<h1 id="page-title">Frontend meets backend.</h1>
+			<p class="intro-copy">This page is served by Spring Boot. Use the controls below to trigger requests to your Java backend and inspect the responses.</p>
+		</section>
+
+		<section class="panel" aria-labelledby="health-title">
+			<div class="panel-heading">
+				<div>
+					<h2 id="health-title">Backend health</h2>
+					<p class="panel-description">Check whether this Spring Boot application can respond.</p>
+				</div>
+				<span class="status" id="status" data-state="idle" role="status" aria-live="polite">Not checked</span>
+			</div>
+
+			<div class="endpoint">
+				<div>
+					<span class="endpoint-label">Endpoint</span>
+					<code>GET /health</code>
+				</div>
+				<button id="check-button" type="button">Check backend</button>
+			</div>
+			<p class="result" id="result" aria-live="polite">Select “Check backend” to send a request.</p>
+		</section>
+
+		<section class="panel" aria-labelledby="developers-title">
+			<div class="panel-heading">
+				<div>
+					<h2 id="developers-title">Developers directory</h2>
+					<p class="panel-description">Fetch developer profiles from the DevConnect backend.</p>
+				</div>
+				<span class="status" id="dev-status" data-state="idle" role="status" aria-live="polite">Not loaded</span>
+			</div>
+
+			<div class="endpoint">
+				<div>
+					<span class="endpoint-label">Endpoint</span>
+					<code>GET /developers</code>
+				</div>
+				<button id="dev-button" type="button">Fetch developers</button>
+			</div>
+			<p class="result" id="dev-result" aria-live="polite">Select “Fetch developers” to send a request.</p>
+			<div id="dev-container" class="dev-grid" style="display: none;"></div>
+		</section>
+
+		<section class="learning" aria-labelledby="flow-title">
+			<h2 id="flow-title">What happens when you click?</h2>
+			<div class="flow">
+				<span>Browser JavaScript</span><b aria-hidden="true">→</b>
+				<span><code>fetch("/developers")</code></span><b aria-hidden="true">→</b>
+				<span>DeveloperController</span><b aria-hidden="true">→</b>
+				<span>DeveloperService</span><b aria-hidden="true">→</b>
+				<span>JSON response</span>
+			</div>
+		</section>
+	</main>
+
+	<script>
+		// --- Backend Health Check ---
+		const checkButton = document.querySelector("#check-button");
+		const statusBadge = document.querySelector("#status");
+		const result = document.querySelector("#result");
+
+		checkButton.addEventListener("click", async () => {
+			checkButton.disabled = true;
+			statusBadge.dataset.state = "checking";
+			statusBadge.textContent = "Checking";
+			result.textContent = "Sending GET /health…";
+
+			try {
+				const response = await fetch("/health", {
+					headers: { Accept: "application/json" }
+				});
+				if (!response.ok) {
+					throw new Error(`Backend returned HTTP ${response.status}`);
+				}
+
+				const health = await response.json();
+				if (typeof health.status !== "string" || health.status.length === 0) {
+					throw new Error("Backend returned an unexpected response");
+				}
+
+				statusBadge.dataset.state = "healthy";
+				statusBadge.textContent = "Connected";
+				result.textContent = `Backend response: ${health.status}`;
+			} catch (error) {
+				statusBadge.dataset.state = "error";
+				statusBadge.textContent = "Unavailable";
+				result.textContent = error instanceof Error
+					? error.message
+					: "Could not connect to the backend.";
+			} finally {
+				checkButton.disabled = false;
+			}
+		});
+
+		// --- Developers Directory Fetch ---
+		const devButton = document.querySelector("#dev-button");
+		const devStatusBadge = document.querySelector("#dev-status");
+		const devResult = document.querySelector("#dev-result");
+		const devContainer = document.querySelector("#dev-container");
+
+		devButton.addEventListener("click", async () => {
+			devButton.disabled = true;
+			devStatusBadge.dataset.state = "checking";
+			devStatusBadge.textContent = "Fetching";
+			devResult.textContent = "Sending GET /developers…";
+			devContainer.style.display = "none";
+			devContainer.innerHTML = "";
+
+			try {
+				const response = await fetch("/developers", {
+					headers: { Accept: "application/json" }
+				});
+				if (!response.ok) {
+					throw new Error(`Backend returned HTTP ${response.status}`);
+				}
+
+				const data = await response.json();
+				if (typeof data.status !== "string" || data.status.length === 0) {
+					throw new Error("Backend returned an unexpected response format");
+				}
+
+				devStatusBadge.dataset.state = "healthy";
+				devStatusBadge.textContent = "Connected";
+				devResult.textContent = `Backend response: ${data.status}`;
+
+				if (Array.isArray(data.developers) && data.developers.length > 0) {
+					devContainer.style.display = "grid";
+					data.developers.forEach(dev => {
+						const card = document.createElement("div");
+						card.className = "dev-card";
+						const initials = dev.name
+							? dev.name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()
+							: "D";
+						const skillsHtml = Array.isArray(dev.skills)
+							? dev.skills.map(s => `<span class="skill-badge">${escapeHtml(s)}</span>`).join("")
+							: "";
+
+						card.innerHTML = `
+							<div class="dev-header">
+								<div class="dev-avatar">${escapeHtml(initials)}</div>
+								<div>
+									<h3 class="dev-name">${escapeHtml(dev.name || "Developer")}</h3>
+									<div class="dev-role">${escapeHtml(dev.role || "Software Engineer")}</div>
+								</div>
+							</div>
+							${dev.bio ? `<p class="dev-bio">${escapeHtml(dev.bio)}</p>` : ""}
+							${skillsHtml ? `<div class="dev-skills">${skillsHtml}</div>` : ""}
+							${dev.email ? `<a class="dev-email" href="mailto:${escapeHtml(dev.email)}">${escapeHtml(dev.email)}</a>` : ""}
+						`;
+						devContainer.appendChild(card);
+					});
+				}
+			} catch (error) {
+				devStatusBadge.dataset.state = "error";
+				devStatusBadge.textContent = "Unavailable";
+				devResult.textContent = error instanceof Error
+					? error.message
+					: "Could not retrieve developers data.";
+			} finally {
+				devButton.disabled = false;
+			}
+		});
+
+		function escapeHtml(text) {
+			const div = document.createElement("div");
+			div.textContent = text;
+			return div.innerHTML;
+		}
+	</script>
+</body>
+</html>
